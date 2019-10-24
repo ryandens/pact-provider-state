@@ -11,6 +11,15 @@ allprojects {
         sourceCompatibility = JavaVersion.VERSION_11
     }
 
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
+
+    dependencies {
+        testImplementation("org.junit.jupiter", "junit-jupiter-api", "5.4.0")
+        testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", "5.4.0")
+    }
+
     spotless {
         java {
             removeUnusedImports()
