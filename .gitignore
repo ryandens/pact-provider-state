@@ -6,6 +6,9 @@
 .gradle
 build/
 
+# IntelliJ
+.idea
+
 # Log file
 *.log
 
