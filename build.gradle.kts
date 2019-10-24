@@ -16,6 +16,7 @@ allprojects {
     }
 
     dependencies {
+        implementation("mysql", "mysql-connector-java", "5.1.6")
         testImplementation("org.junit.jupiter", "junit-jupiter-api", "5.4.0")
         testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", "5.4.0")
     }
