@@ -57,6 +57,8 @@ public final class Application {
                   + exchange.getResponseCode());
         });
 
+    server.createContext("/provider-state", new ProviderStateHandler(connection));
+
     logger.info("HttpServer started listening on" + address);
 
     server.start();
