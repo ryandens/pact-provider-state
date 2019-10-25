@@ -17,16 +17,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-/** Unit tests for the {@link ProviderStateHandler} */
-final class ProviderStateHandlerTest {
+/** Unit tests for the {@link ProviderStateHttpHandler} */
+final class ProviderStateHttpHandlerTest {
 
-  private ProviderStateHandler providerStateHandler;
+  private ProviderStateHttpHandler providerStateHttpHandler;
   private Statement statementStub;
   private static final String setupQuery = "INSERT into users(name,age) VALUES('Ryan', 23);";
   private static final String teardownQuery = "DELETE from users WHERE name = 'Ryan';";
 
   /**
-   * Sets up the stubs for and the instance of {@link ProviderStateHandler}
+   * Sets up the stubs for and the instance of {@link ProviderStateHttpHandler}
    *
    * @throws SQLException, but not really because this is only thrown while stubbing {@link}
    */
@@ -37,7 +37,8 @@ final class ProviderStateHandlerTest {
     // Statement mock used to verify
     statementStub = stub(Statement.class);
     when(connectionStub.createStatement()).thenReturn(statementStub);
-    providerStateHandler = new ProviderStateHandler(connectionStub, setupQuery, teardownQuery);
+    providerStateHttpHandler =
+        new ProviderStateHttpHandler(connectionStub, setupQuery, teardownQuery);
   }
 
   private <T> T stub(final Class<T> classToStub) {
@@ -48,7 +49,7 @@ final class ProviderStateHandlerTest {
     return Stream.of(Arguments.of("setup", setupQuery), Arguments.of("teardown", teardownQuery));
   }
 
-  /** Verifies that the {@link ProviderStateHandler} properly handles a setup message */
+  /** Verifies that the {@link ProviderStateHttpHandler} properly handles a setup message */
   @ParameterizedTest(name = "action={0}, query={1}")
   @MethodSource("actionAndQueryProvider")
   void it_deserializes_valid_body_and_sends_setupQuery(
@@ -71,7 +72,7 @@ final class ProviderStateHandlerTest {
 
     // WHEN the ProviderStateHandler handles the exchange
     try {
-      providerStateHandler.handle(httpExchange);
+      providerStateHttpHandler.handle(httpExchange);
     } catch (IOException e) {
       throw new AssertionError("Test failed", e);
     }

@@ -63,7 +63,7 @@ public final class Application {
       final var providerStateContext =
           server.createContext(
               "/provider-state",
-              new ProviderStateHandler(
+              new ProviderStateHttpHandler(
                   connection, config.getString("setupQuery"), config.getString("teardownQuery")));
       logger.info("registered context with uri: " + providerStateContext.getPath());
     } else {

@@ -9,14 +9,14 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 /** Receives HTTP requests with a serialized {@link ProviderState} in the request body */
-final class ProviderStateHandler implements HttpHandler {
+final class ProviderStateHttpHandler implements HttpHandler {
 
   private final Connection connection;
   private final ObjectMapper objectMapper;
   private final String setupQuery;
   private final String teardownQuery;
 
-  ProviderStateHandler(
+  ProviderStateHttpHandler(
       final Connection connection, final String setupQuery, final String teardownQuery) {
     this.connection = connection;
     objectMapper = new ObjectMapper();
