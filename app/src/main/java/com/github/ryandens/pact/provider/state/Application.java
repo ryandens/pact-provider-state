@@ -1,5 +1,6 @@
 package com.github.ryandens.pact.provider.state;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -63,8 +64,12 @@ public final class Application {
       final var providerStateContext =
           server.createContext(
               "/provider-state",
-              new ProviderStateHttpHandler(
-                  connection, config.getString("setupQuery"), config.getString("teardownQuery")));
+              new ProviderStateDeserializationHttpHandler(
+                  new SqlProviderStateHandler(
+                      connection,
+                      config.getString("setupQuery"),
+                      config.getString("teardownQuery")),
+                  new ObjectMapper()));
       logger.info("registered context with uri: " + providerStateContext.getPath());
     } else {
       logger.info(
