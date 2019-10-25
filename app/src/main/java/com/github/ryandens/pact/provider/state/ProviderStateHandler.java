@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.logging.Logger;
 
 /** Receives HTTP requests with a serialized {@link ProviderState} in the request body */
@@ -12,10 +13,15 @@ final class ProviderStateHandler implements HttpHandler {
 
   private final Connection connection;
   private final ObjectMapper objectMapper;
+  private final String setupQuery;
+  private final String teardownQuery;
 
-  ProviderStateHandler(final Connection connection) {
+  ProviderStateHandler(
+      final Connection connection, final String setupQuery, final String teardownQuery) {
     this.connection = connection;
     objectMapper = new ObjectMapper();
+    this.setupQuery = setupQuery;
+    this.teardownQuery = teardownQuery;
   }
 
   /**
@@ -34,8 +40,23 @@ final class ProviderStateHandler implements HttpHandler {
     final var providerState = objectMapper.readValue(body, ProviderState.class);
     logger.info(providerState.state());
 
-    // send the response headers
-    exchange.sendResponseHeaders(204, -1);
+    var query = providerState.action().equals("setup") ? setupQuery : teardownQuery;
+    logger.info("executing query: " + query);
+    final int result;
+    try {
+      result = connection.createStatement().executeUpdate(query);
+    } catch (SQLException e) {
+      logger.severe("Problem creating SQL Statement: " + e.getMessage());
+      exchange.sendResponseHeaders(500, -1);
+      return;
+    }
+
+    if (result != 1) {
+      exchange.sendResponseHeaders(500, -1);
+    } else {
+      // send the response headers
+      exchange.sendResponseHeaders(204, -1);
+    }
   }
 
   private static final Logger logger = Logger.getLogger("pact-provider-state-handler");
