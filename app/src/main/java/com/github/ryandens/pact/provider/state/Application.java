@@ -33,6 +33,20 @@ public final class Application {
       throw new RuntimeException("Problem initializing HttpServer", e);
     }
 
+    final var pingContext =
+        server.createContext(
+            "/ping",
+            exchange -> {
+              exchange.sendResponseHeaders(204, -1);
+              exchange.close();
+              logger.info(
+                  "request URI:"
+                      + exchange.getRequestURI()
+                      + ", response code:"
+                      + exchange.getResponseCode());
+            });
+    logger.info("registered context with uri: " + pingContext.getPath());
+
     // create a connection to the database
     final var connection =
         getConnection(
@@ -45,26 +59,24 @@ public final class Application {
             config.getString("mysqlUser"),
             config.getString("mysqlPassword"));
 
-    server.createContext(
-        "/ping",
-        exchange -> {
-          exchange.sendResponseHeaders(204, -1);
-          exchange.close();
-          logger.info(
-              "request URI:"
-                  + exchange.getRequestURI()
-                  + ", response code:"
-                  + exchange.getResponseCode());
-        });
-
-    server.createContext(
-        "/provider-state",
-        new ProviderStateHandler(
-            connection, config.getString("setupQuery"), config.getString("teardownQuery")));
-
+    if (connection != null) {
+      final var providerStateContext =
+          server.createContext(
+              "/provider-state",
+              new ProviderStateHandler(
+                  connection, config.getString("setupQuery"), config.getString("teardownQuery")));
+      logger.info("registered context with uri: " + providerStateContext.getPath());
+    } else {
+      logger.info(
+          "skipping creation of provider-state endpoint because no SQL connection is available");
+    }
     logger.info("HttpServer started listening on" + address);
-
-    server.start();
+    try {
+      server.start();
+    } catch (Throwable t) {
+      logger.severe(t.getMessage());
+      t.printStackTrace();
+    }
   }
 
   /**
