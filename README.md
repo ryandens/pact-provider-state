@@ -21,3 +21,10 @@ To run the application with Docker, run the following commands
 > $ ./gradlew jibDockerBuild # builds the image
 > $ docker run --rm ryandens/pact-provider-state
 ```
+
+## Configuration
+The configurations that are made available for others who might want to use
+this application can be found, with defaults at 
+[reference.conf](app/src/main/resources/reference.conf). Additional configurations
+should be specified by creating an `application.conf` file in the same directory.
+Note that `application.conf` is ignored from git (see [.gitignore](.gitignore)).
