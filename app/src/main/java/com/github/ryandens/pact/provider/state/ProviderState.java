@@ -11,7 +11,14 @@ final class ProviderState {
   @JsonProperty("state")
   private String state;
 
+  @JsonProperty("action")
+  private String action;
+
   String state() {
     return state;
+  }
+
+  String action() {
+    return action;
   }
 }
