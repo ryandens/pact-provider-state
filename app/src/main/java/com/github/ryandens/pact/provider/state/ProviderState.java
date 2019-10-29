@@ -20,6 +20,8 @@ final class ProviderState {
     this.action = action;
   }
 
+  /** No-args ctor used by {@link com.fasterxml.jackson} */
+  @SuppressWarnings("unused")
   public ProviderState() {}
 
   String state() {
