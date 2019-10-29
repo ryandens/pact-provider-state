@@ -5,38 +5,43 @@ import static com.github.ryandens.pact.provider.state.ProviderStateHandlerResult
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.logging.Logger;
 
-/**
- * Uses a SQL {@link Connection} to modify the state of the Provider, given supplied {@link
- * #setupQuery} and {@link #teardownQuery} provided at startup time.
- */
+/** Uses a SQL {@link Connection} to modify the state of the Provider */
 final class SqlProviderStateHandler implements ProviderStateHandler {
 
   private final Connection connection;
-  private final String setupQuery;
-  private final String teardownQuery;
+  private final Map<String, SqlProviderStateQueries> sqlProviderStateQueriesMap;
 
+  /**
+   * @param sqlProviderStateQueriesMap is a map which maps {@link String}s representing the desired
+   *     state of the Provider to a {@link SqlProviderStateQueries}, which holds the information
+   *     about how to get the provider in that state. This is read in at startup time and determines
+   *     the actions this service is capable of.
+   */
   SqlProviderStateHandler(
-      final Connection connection, final String setupQuery, final String teardownQuery) {
+      final Connection connection,
+      final Map<String, SqlProviderStateQueries> sqlProviderStateQueriesMap) {
     this.connection = connection;
-    this.setupQuery = setupQuery;
-    this.teardownQuery = teardownQuery;
+    this.sqlProviderStateQueriesMap = sqlProviderStateQueriesMap;
   }
 
   /**
-   * Executes the {@link #setupQuery} if the {@link ProviderState#action()} is {@code null} or
-   * {@code "setup"}. Executes the {@link #teardownQuery} if {@link ProviderState#action() is {@code "teardown"}
+   * Executes the {@link SqlProviderStateQueries} corresponding to the parameterized {@link
+   * ProviderState}, which tells the service which {@link SqlProviderStateQueries} it should execute
+   * now.
    *
-   * @param providerState
-   * @return {@link ProviderStateHandlerResult#SUCCESS} if we successfully altered the provider as expected, else returns {@link ProviderStateHandlerResult#FAILURE}
+   * @return {@link ProviderStateHandlerResult#SUCCESS} if we successfully altered the provider as
+   *     expected, else returns {@link ProviderStateHandlerResult#FAILURE}
    */
   @Override
   public ProviderStateHandlerResult handle(final ProviderState providerState) {
+    final var sqlProviderStateQueries = sqlProviderStateQueriesMap.get(providerState.state());
     var query =
         providerState.action() != null && providerState.action().equals("teardown")
-            ? teardownQuery
-            : setupQuery;
+            ? sqlProviderStateQueries.teardownQuery()
+            : sqlProviderStateQueries.setupQuery();
     logger.info("executing query: " + query);
     final int result;
     try {

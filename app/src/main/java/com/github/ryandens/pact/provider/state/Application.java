@@ -4,12 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigObject;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,10 +69,7 @@ public final class Application {
           server.createContext(
               "/provider-state",
               new ProviderStateDeserializationHttpHandler(
-                  new SqlProviderStateHandler(
-                      connection,
-                      config.getString("setupQuery"),
-                      config.getString("teardownQuery")),
+                  new SqlProviderStateHandler(connection, providerStateQueries(config)),
                   new ObjectMapper()));
       logger.info("registered context with uri: " + providerStateContext.getPath());
     } else {
@@ -82,6 +83,27 @@ public final class Application {
       logger.severe(t.getMessage());
       t.printStackTrace();
     }
+  }
+
+  /**
+   * Read in the {@link SqlProviderStateQueries} enumerated in the config at the path {@code
+   * "providerStates"}
+   *
+   * @return a {@link Map} where the {@link Map.Entry#getKey()} is the {@link String} describing the
+   *     action, e.g. what is sent in {@link ProviderState#action()} and the value is the {@link
+   *     SqlProviderStateQueries} used to put the provider in the desired state
+   */
+  private static Map<String, SqlProviderStateQueries> providerStateQueries(final Config config) {
+    final var map = new HashMap<String, SqlProviderStateQueries>();
+    for (ConfigObject configObject : config.getObjectList("providerStates")) {
+      final var providerStateConfig = configObject.toConfig();
+      map.put(
+          providerStateConfig.getString("state"),
+          new SqlProviderStateQueries(
+              providerStateConfig.getString("setupQuery"),
+              providerStateConfig.getString("teardownQuery")));
+    }
+    return Collections.unmodifiableMap(map);
   }
 
   /**
