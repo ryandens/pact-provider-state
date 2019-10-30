@@ -1,4 +1,4 @@
-name: Java CI
+name: ✅ Test, 🐳 build image, 🚀 deploy to Docker Hub
 
 on: [push]
 
@@ -13,5 +13,5 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
-    - name: Build with Gradle
-      run: ./gradlew check
+    - name: ✅ Test, 🐳 build image, 🚀 deploy to Docker Hub
+      run: ./gradlew build jib -Djib.to.auth.username=${{ secrets.REGISTRY_USERNAME }} -Djib.to.auth.password=${{ secrets.REGISTRY_PASSWORD }}
