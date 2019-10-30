@@ -3,7 +3,9 @@ plugins {
     id("com.google.cloud.tools.jib") version "1.1.2"
 }
 
-jib.to.image = "ryandens/pact-provider-state"
+val versionedTag: String = if (System.getenv("GITHUB_SHA") != null) System.getenv("GITHUB_SHA").substring(7) else "latest"
+jib.to.tags = setOf("latest", versionedTag)
+jib.to.image = "rdens1/pact-provider-state"
 
 application {
     mainClassName = "com.github.ryandens.pact.provider.state.Application"
