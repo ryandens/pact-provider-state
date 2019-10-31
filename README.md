@@ -20,15 +20,19 @@ To run the application with Docker, run the following commands
 
 ```shell script
 > $ ./gradlew jibDockerBuild # builds the image
-> $ docker run --rm ryandens/pact-provider-state
+> $ docker run --rm rdens1/pact-provider-state
 ```
+
+Note that each commit to master is deployed to [https://hub.docker.com/r/rdens1/pact-provider-state](https://hub.docker.com/r/rdens1/pact-provider-state).
+Each deployment is tagged with `latest` and the short SHA-1 for the commit (e.g. `git rev-parse --short HEAD`)
 
 ## Configuration
 The configurations that are made available for others who might want to use
 this application can be found, with defaults at 
-[reference.conf](app/src/main/resources/reference.conf). Additional configurations
-should be specified by creating an `application.conf` file in the same directory.
-Note that `application.conf` is ignored from git (see [.gitignore](.gitignore)).
+[app/src/main/resources/reference.conf](app/src/main/resources/reference.conf). 
+Additional configurations should be specified by creating an `application.conf` 
+file in the same directory as `reference.conf`. Note that `application.conf` is 
+ignored from git (see [.gitignore](.gitignore)).
 
 To configure the provider states which can be setup, simply configure the `providerStates`
 variable in your configuration file. Note that the `state` field must correspond to
