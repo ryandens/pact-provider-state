@@ -14,4 +14,7 @@ jobs:
       with:
         java-version: 11
     - name: ✅ Test, 🐳 build image, 🚀 deploy to Docker Hub
-      run: ./gradlew build jib -Djib.to.auth.username=${{ secrets.REGISTRY_USERNAME }} -Djib.to.auth.password=${{ secrets.REGISTRY_PASSWORD }}
+      run: ./gradlew build jib -Djib.to.auth.username=$REGISTRY_USERNAME -Djib.to.auth.password=$REGISTRY_PASSWORD
+      env:
+        REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+        REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
